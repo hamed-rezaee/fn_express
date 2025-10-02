@@ -130,7 +130,7 @@ void main() {
   });
 
   group('Built-in Functions and Constants', () {
-    test('uses constants pi and e', () {
+    test('uses constants', () {
       expect(interpreter.eval('pi').value, closeTo(3.14159, 0.00001));
       expect(interpreter.eval('2 * e').value, closeTo(5.43656, 0.00001));
     });
@@ -156,6 +156,13 @@ void main() {
     test('ln throws error for non-positive numbers', () {
       expect(() => interpreter.eval('ln(0)'), throwsA(isA<ArgumentError>()));
       expect(() => interpreter.eval('ln(-1)'), throwsA(isA<ArgumentError>()));
+    });
+
+    test('exp calculates exponential function correctly', () {
+      expect(interpreter.eval('exp(0)').value, closeTo(1.0, 1e-10));
+      expect(
+          interpreter.eval('exp(1)').value, closeTo(2.718281828459045, 1e-10));
+      expect(interpreter.eval('exp(ln(5))').value, closeTo(5.0, 1e-10));
     });
 
     test('log calculates logarithm with specified base', () {
@@ -420,6 +427,356 @@ void main() {
 
     test('throws on not enough arguments for function', () {
       expect(() => interpreter.eval('fraction(1)'), throwsA(isA<StateError>()));
+    });
+  });
+
+  group('Hyperbolic Functions', () {
+    test('calculates hyperbolic sine correctly', () {
+      final result = interpreter.eval('sinh(1)');
+
+      expectValue<DoubleValue>(result, 1.1752011936438014);
+    });
+
+    test('calculates hyperbolic cosine correctly', () {
+      final result = interpreter.eval('cosh(1)');
+
+      expectValue<DoubleValue>(result, 1.5430806348152437);
+    });
+
+    test('calculates hyperbolic tangent correctly', () {
+      final result = interpreter.eval('tanh(1)');
+
+      expectValue<DoubleValue>(result, 0.7615941559557649);
+    });
+
+    test('calculates inverse hyperbolic sine correctly', () {
+      final result = interpreter.eval('asinh(1)');
+
+      expectValue<DoubleValue>(result, 0.8813735870195429);
+    });
+
+    test('calculates inverse hyperbolic cosine correctly', () {
+      final result = interpreter.eval('acosh(2)');
+
+      expectValue<DoubleValue>(result, 1.3169578969248166);
+    });
+
+    test('throws on invalid acosh domain', () {
+      expect(
+        () => interpreter.eval('acosh(0.5)'),
+        throwsA(isA<ArgumentError>()),
+      );
+    });
+
+    test('calculates inverse hyperbolic tangent correctly', () {
+      final result = interpreter.eval('atanh(0.5)');
+
+      expectValue<DoubleValue>(result, 0.5493061443340549);
+    });
+
+    test('throws on invalid atanh domain', () {
+      expect(
+        () => interpreter.eval('atanh(1.5)'),
+        throwsA(isA<ArgumentError>()),
+      );
+      expect(
+        () => interpreter.eval('atanh(-1.5)'),
+        throwsA(isA<ArgumentError>()),
+      );
+    });
+  });
+
+  group('Special Mathematical Functions', () {
+    test('calculates gamma function correctly', () {
+      final result = interpreter.eval('gamma(5)');
+
+      expect(result, isA<DoubleValue>());
+      expect(result.value as double, closeTo(24, 1e-10));
+    });
+
+    test('calculates gamma function for fractional values', () {
+      final result = interpreter.eval('gamma(0.5)');
+
+      expect(result, isA<DoubleValue>());
+      expect(result.value as double, closeTo(1.7724538509055159, 1e-10));
+    });
+
+    test('throws on invalid gamma domain', () {
+      expect(
+        () => interpreter.eval('gamma(-1)'),
+        throwsA(isA<ArgumentError>()),
+      );
+      expect(() => interpreter.eval('gamma(0)'), throwsA(isA<ArgumentError>()));
+    });
+
+    test('calculates double factorial correctly', () {
+      expectValue<IntegerValue>(interpreter.eval('factorial2(5)'), 15);
+      expectValue<IntegerValue>(interpreter.eval('factorial2(6)'), 48);
+      expectValue<IntegerValue>(interpreter.eval('factorial2(0)'), 1);
+      expectValue<IntegerValue>(interpreter.eval('factorial2(1)'), 1);
+    });
+
+    test('throws on invalid double factorial input', () {
+      expect(
+        () => interpreter.eval('factorial2(-1)'),
+        throwsA(isA<ArgumentError>()),
+      );
+      expect(
+        () => interpreter.eval('factorial2(2.5)'),
+        throwsA(isA<ArgumentError>()),
+      );
+    });
+  });
+
+  group('Number Theory Functions', () {
+    test('calculates greatest common divisor correctly', () {
+      expectValue<IntegerValue>(interpreter.eval('gcd(12, 18)'), 6);
+      expectValue<IntegerValue>(interpreter.eval('gcd(17, 13)'), 1);
+      expectValue<IntegerValue>(interpreter.eval('gcd(100, 25)'), 25);
+    });
+
+    test('calculates least common multiple correctly', () {
+      expectValue<IntegerValue>(interpreter.eval('lcm(12, 18)'), 36);
+      expectValue<IntegerValue>(interpreter.eval('lcm(4, 6)'), 12);
+      expectValue<IntegerValue>(interpreter.eval('lcm(7, 5)'), 35);
+    });
+
+    test('handles zero in lcm correctly', () {
+      expectValue<IntegerValue>(interpreter.eval('lcm(0, 5)'), 0);
+      expectValue<IntegerValue>(interpreter.eval('lcm(7, 0)'), 0);
+    });
+  });
+
+  group('Statistical Functions', () {
+    test('calculates median for two numbers', () {
+      final result = interpreter.eval('median(3, 7)');
+
+      expectValue<DoubleValue>(result, 5.0);
+    });
+
+    test('calculates mode for two numbers', () {
+      final result = interpreter.eval('mode(5, 5)');
+
+      expectValue<IntegerValue>(result, 5);
+    });
+
+    test('calculates standard deviation for two numbers', () {
+      final result = interpreter.eval('stdev(2, 4)');
+
+      expect(result, isA<DoubleValue>());
+      expect(result.value as double, closeTo(1.4142135623730951, 1e-10));
+    });
+
+    test('calculates variance for two numbers', () {
+      final result = interpreter.eval('variance(2, 4)');
+
+      expectValue<DoubleValue>(result, 2.0);
+    });
+
+    test('calculates average for numbers', () {
+      final result1 = interpreter.eval('average(2, 4, 6)');
+      expectValue<DoubleValue>(result1, 4.0);
+
+      final result2 = interpreter.eval('average(1, 2, 3, 4, 5)');
+      expectValue<DoubleValue>(result2, 3.0);
+
+      final result3 = interpreter.eval('average(10)');
+      expectValue<DoubleValue>(result3, 10.0);
+
+      final result4 = interpreter.eval('average(2.5, 3.5)');
+      expectValue<DoubleValue>(result4, 3.0);
+    });
+
+    test('throws on complex numbers in statistical functions', () {
+      expect(
+          () => interpreter.eval('median(complex(1, 1), 5)'),
+          throwsA(
+            isA<ArgumentError>(),
+          ));
+      expect(
+        () => interpreter.eval('mode(complex(1, 1), 5)'),
+        throwsA(isA<ArgumentError>()),
+      );
+      expect(
+        () => interpreter.eval('stdev(complex(1, 1), 5)'),
+        throwsA(isA<ArgumentError>()),
+      );
+      expect(
+        () => interpreter.eval('variance(complex(1, 1), 5)'),
+        throwsA(isA<ArgumentError>()),
+      );
+      expect(
+        () => interpreter.eval('average(complex(1, 1), 5)'),
+        throwsA(isA<ArgumentError>()),
+      );
+    });
+  });
+
+  group('Random Function', () {
+    test('generates random numbers between 0 and 1', () {
+      final result1 = interpreter.eval('random()');
+      final result2 = interpreter.eval('random()');
+
+      expect(result1, isA<DoubleValue>());
+      expect(result2, isA<DoubleValue>());
+
+      final value1 = result1.value as double;
+      final value2 = result2.value as double;
+
+      expect(value1, greaterThanOrEqualTo(0));
+      expect(value1, lessThan(1));
+      expect(value2, greaterThanOrEqualTo(0));
+      expect(value2, lessThan(1));
+
+      expect(value1, isNot(equals(value2)));
+    });
+  });
+
+  group('Multi-Parameter Function Support', () {
+    late Interpreter interpreter;
+
+    setUp(() {
+      interpreter = Interpreter();
+    });
+
+    group('Statistical Functions with Variable Arguments', () {
+      test('median works with multiple arguments', () {
+        expect(interpreter.eval('median(1, 2, 3, 4, 5)').value, equals(3.0));
+        expect(interpreter.eval('median(10, 5, 15, 20)').value, equals(12.5));
+        expect(interpreter.eval('median(7, 3, 9)').value, equals(7.0));
+        expect(interpreter.eval('median(1)').value, equals(1.0));
+      });
+
+      test('mode works with multiple arguments', () {
+        expect(interpreter.eval('mode(1, 2, 2, 3, 2)').value, equals(2));
+        expect(interpreter.eval('mode(5, 5, 5, 3)').value, equals(5));
+        expect(interpreter.eval('mode(1, 2, 3)').value, equals(1));
+        expect(interpreter.eval('mode(7)').value, equals(7));
+      });
+
+      test('stdev works with multiple arguments', () {
+        final result3 = interpreter.eval('stdev(2, 4, 6)').value as double;
+
+        expect(result3, closeTo(2.0, 1e-10));
+
+        final result5 =
+            interpreter.eval('stdev(1, 2, 3, 4, 5)').value as double;
+
+        expect(result5, closeTo(1.5811388300841898, 1e-10));
+
+        final result2 = interpreter.eval('stdev(2, 8)').value as double;
+
+        expect(result2, closeTo(4.242640687119285, 1e-10));
+      });
+
+      test('variance works with multiple arguments', () {
+        final result3 = interpreter.eval('variance(2, 4, 6)').value as double;
+
+        expect(result3, closeTo(4.0, 1e-10));
+
+        final result5 =
+            interpreter.eval('variance(1, 2, 3, 4, 5)').value as double;
+
+        expect(result5, closeTo(2.5, 1e-10));
+      });
+
+      test('average works with multiple arguments', () {
+        expect(interpreter.eval('average(1, 2, 3, 4, 5)').value, equals(3.0));
+        expect(interpreter.eval('average(10, 20)').value, equals(15.0));
+        expect(interpreter.eval('average(2.5, 3.5, 4.5)').value, equals(3.5));
+        expect(interpreter.eval('average(7)').value, equals(7.0));
+        expect(interpreter.eval('average(-5, 0, 5)').value, equals(0.0));
+      });
+
+      test('statistical functions require minimum arguments', () {
+        expect(
+          () => interpreter.eval('stdev(5)'),
+          throwsA(isA<ArgumentError>()),
+        );
+        expect(
+          () => interpreter.eval('variance(3)'),
+          throwsA(isA<ArgumentError>()),
+        );
+        expect(
+          () => interpreter.eval('median()'),
+          throwsA(isA<ArgumentError>()),
+        );
+        expect(() => interpreter.eval('mode()'), throwsA(isA<ArgumentError>()));
+        expect(
+          () => interpreter.eval('average()'),
+          throwsA(isA<ArgumentError>()),
+        );
+      });
+    });
+
+    group('Min/Max Functions with Variable Arguments', () {
+      test('min works with multiple arguments', () {
+        expect(interpreter.eval('min(5, 2, 8, 1, 9)').value, equals(1));
+        expect(interpreter.eval('min(3.5, 2.1, 4.7)').value, equals(2.1));
+        expect(interpreter.eval('min(10)').value, equals(10));
+        expect(interpreter.eval('min(-5, -2, -8)').value, equals(-8));
+      });
+
+      test('max works with multiple arguments', () {
+        expect(interpreter.eval('max(5, 2, 8, 1, 9)').value, equals(9));
+        expect(interpreter.eval('max(3.5, 2.1, 4.7)').value, equals(4.7));
+        expect(interpreter.eval('max(10)').value, equals(10));
+        expect(interpreter.eval('max(-5, -2, -8)').value, equals(-2));
+      });
+
+      test('min/max preserve integer types when all args are integers', () {
+        final minResult = interpreter.eval('min(5, 2, 8, 1, 9)');
+
+        expect(minResult, isA<IntegerValue>());
+
+        final maxResult = interpreter.eval('max(5, 2, 8, 1, 9)');
+
+        expect(maxResult, isA<IntegerValue>());
+      });
+
+      test('min/max return double when any arg is double', () {
+        final minResult = interpreter.eval('min(5, 2.1, 8)');
+
+        expect(minResult, isA<DoubleValue>());
+
+        final maxResult = interpreter.eval('max(5, 2.1, 8)');
+
+        expect(maxResult, isA<DoubleValue>());
+      });
+
+      test('min/max require at least one argument', () {
+        expect(() => interpreter.eval('min()'), throwsA(isA<ArgumentError>()));
+        expect(() => interpreter.eval('max()'), throwsA(isA<ArgumentError>()));
+      });
+    });
+
+    group('Backward Compatibility', () {
+      test('two-parameter functions still work as before', () {
+        expect(interpreter.eval('median(3, 7)').value, equals(5.0));
+        expect(interpreter.eval('stdev(2, 4)').value,
+            closeTo(1.4142135623730951, 1e-10));
+        expect(interpreter.eval('min(10, 5)').value, equals(5));
+        expect(interpreter.eval('max(10, 5)').value, equals(10));
+      });
+    });
+
+    group('Complex Expressions with Multi-Parameter Functions', () {
+      test('nested function calls work correctly', () {
+        final result = interpreter.eval('max(min(5, 3), min(2, 8))');
+
+        expect(result.value, equals(3));
+      });
+
+      test('variable arguments with variables work', () {
+        interpreter
+          ..eval('a = 2')
+          ..eval('b = 4')
+          ..eval('c = 6');
+
+        final result = interpreter.eval('stdev(a, b, c)');
+
+        expect(result.value, closeTo(2.0, 1e-10));
+      });
     });
   });
 }

@@ -102,7 +102,7 @@ class OperatorToken extends Token {
 /// Example:
 /// ```dart
 /// // In the expression "-5 + 3", the first "-" is a unary minus
-/// final token = UnaryMinusToken(); // Represents the negation operator
+/// final token = UnaryMinusToken();
 /// ```
 class UnaryMinusToken extends OperatorToken {
   /// Creates a unary minus token.
@@ -126,7 +126,7 @@ class UnaryMinusToken extends OperatorToken {
 ///
 /// Example:
 /// ```dart
-/// final token = FunctionToken('sqrt'); // Represents sqrt function
+/// final token = FunctionToken('sqrt');
 /// ```
 class FunctionToken extends Token {
   /// Creates a function token with the specified function [value] name.
@@ -140,7 +140,7 @@ class FunctionToken extends Token {
 ///
 /// Example:
 /// ```dart
-/// final token = VariableToken('x'); // Represents variable 'x'
+/// final token = VariableToken('x');
 /// ```
 class VariableToken extends Token {
   /// Creates a variable token with the specified variable [value] name.
@@ -154,7 +154,7 @@ class VariableToken extends Token {
 ///
 /// Example:
 /// ```dart
-/// final token = ConstantToken('pi'); // Represents the constant π
+/// final token = ConstantToken('pi');
 /// ```
 class ConstantToken extends Token {
   /// Creates a constant token with the specified constant [value] name.

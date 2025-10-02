@@ -78,8 +78,8 @@ abstract class NumberValue {
 /// ```dart
 /// final num1 = IntegerValue(5);
 /// final num2 = IntegerValue(3);
-/// final sum = num1 + num2; // Returns IntegerValue(8)
-/// final quotient = num1 / num2; // Returns DoubleValue(1.6666...)
+/// final sum = num1 + num2;
+/// final quotient = num1 / num2;
 /// ```
 class IntegerValue extends NumberValue {
   /// Creates a new integer value wrapping the given [value].
@@ -94,7 +94,7 @@ class IntegerValue extends NumberValue {
     if (other is IntegerValue) return IntegerValue(value + other.value);
     if (other is DoubleValue) return DoubleValue(value + other.value);
 
-    return other + this; // Defer to the other type's implementation
+    return other + this;
   }
 
   @override
@@ -153,7 +153,7 @@ class IntegerValue extends NumberValue {
 /// ```dart
 /// final num1 = DoubleValue(3.14);
 /// final num2 = IntegerValue(2);
-/// final product = num1 * num2; // Returns DoubleValue(6.28)
+/// final product = num1 * num2;
 /// ```
 class DoubleValue extends NumberValue {
   /// Creates a new double value wrapping the given [value].
@@ -261,7 +261,7 @@ class ComplexValue extends NumberValue {
   /// Example:
   /// ```dart
   /// final real = DoubleValue(5.0);
-  /// final complex = ComplexValue.from(real); // Creates Complex(5.0, 0)
+  /// final complex = ComplexValue.from(real);
   /// ```
   factory ComplexValue.from(NumberValue val) {
     if (val is ComplexValue) {

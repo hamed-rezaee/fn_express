@@ -64,7 +64,7 @@ class Lexer {
   ///
   /// Example:
   /// ```dart
-  /// final tokens = lexer.tokenize(); // Converts "2*x+1" to tokens
+  /// final tokens = lexer.tokenize();
   /// ```
   List<Token> tokenize() {
     final tokens = <Token>[];

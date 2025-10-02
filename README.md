@@ -6,8 +6,8 @@ A powerful Dart package for parsing and evaluating mathematical expressions with
 
 - **Complete Arithmetic Support**: Basic operations (+, -, \*, /, %, ^) with proper operator precedence
 - **Variable Management**: Define and use variables with assignment operations
-- **Rich Function Library**: Extensive collection of mathematical functions
-- **Mathematical Constants**: Built-in constants (π, e, i)
+- **Rich Function Library**: Extensive collection of mathematical functions including sign and clamp
+- **Mathematical Constants**: Built-in constants (π, e, i, φ, τ)
 - **Multiple Number Types**: Integers, doubles, and complex numbers with automatic type promotion
 - **Expression Parsing**: Robust lexer and parser with error handling
 - **Implicit Multiplication**: Natural syntax like `2x`, `3(x+1)`, `(a+b)(c+d)`
@@ -20,11 +20,21 @@ A powerful Dart package for parsing and evaluating mathematical expressions with
 - `sqrt(x)` - Square root (returns complex for negative inputs)
 - `abs(x)` - Absolute value (magnitude for complex numbers)
 - `ln(x)` - Natural logarithm
+- `exp(x)` - Exponential function (e^x)
 
 ### Trigonometric Functions
 
 - `sin(x)`, `cos(x)`, `tan(x)` - Standard trigonometric functions
 - `asin(x)`, `acos(x)`, `atan(x)` - Inverse trigonometric functions
+
+### Hyperbolic Functions
+
+- `sinh(x)` - Hyperbolic sine
+- `cosh(x)` - Hyperbolic cosine
+- `tanh(x)` - Hyperbolic tangent
+- `asinh(x)` - Inverse hyperbolic sine
+- `acosh(x)` - Inverse hyperbolic cosine (domain: x ≥ 1)
+- `atanh(x)` - Inverse hyperbolic tangent (domain: -1 < x < 1)
 
 ### Rounding Functions
 
@@ -36,21 +46,81 @@ A powerful Dart package for parsing and evaluating mathematical expressions with
 ### Special Functions
 
 - `fact(x)` - Factorial (for non-negative integers)
+- `factorial2(x)` - Double factorial (x!! = x*(x-2)*(x-4)...1 or 2)
+- `gamma(x)` - Gamma function (generalization of factorial for real numbers > 0)
+- `sign(x)` - Sign function (returns -1, 0, or 1)
 
 ### Multi-Argument Functions
 
 - `complex(real, imag)` - Create complex numbers
 - `log(value, base)` - Logarithm with custom base
 - `pow(base, exponent)` - Power function
-- `min(a, b)` - Minimum of two values
-- `max(a, b)` - Maximum of two values
+- `min(a, b, c, ...)` - Minimum of multiple values
+- `max(a, b, c, ...)` - Maximum of multiple values
 - `fraction(numerator, denominator)` - Create fractions
+- `clamp(value, min, max)` - Clamp value between minimum and maximum bounds
+
+### Number Theory Functions
+
+- `gcd(a, b)` - Greatest common divisor
+- `lcm(a, b)` - Least common multiple
+
+### Statistical Functions
+
+- `average(a, b, c, ...)` - Average (arithmetic mean) of multiple values
+- `median(a, b, c, ...)` - Median of multiple values
+- `mode(a, b, c, ...)` - Mode of multiple values (most frequent)
+- `stdev(a, b, c, ...)` - Sample standard deviation of multiple values (minimum 2 required)
+- `variance(a, b, c, ...)` - Sample variance of multiple values (minimum 2 required)
+
+### Random Number Generation
+
+- `random()` - Generate random number between 0 and 1
 
 ## Constants
 
 - `pi` - Mathematical constant π (3.14159...)
 - `e` - Mathematical constant e (2.71828...)
 - `i` - Imaginary unit (√-1)
+- `phi` - Golden ratio φ (1.61803...)
+- `tau` - Mathematical constant τ = 2π (6.28318...)
+
+## What's New in v1.2.0
+
+🎉 **Major Function Expansion!** We've added 15+ new mathematical functions:
+
+### New Functions Added:
+
+- **Hyperbolic Functions**: `sinh()`, `cosh()`, `tanh()`, `asinh()`, `acosh()`, `atanh()`
+- **Exponential**: `exp()` (e^x)
+- **Special Math**: `gamma()`, `factorial2()` (double factorial)
+- **Number Theory**: `gcd()`, `lcm()`
+- **Statistics**: `average()`, `median()`, `mode()`, `stdev()`, `variance()`
+- **Random**: `random()` for random number generation
+
+### Quick Examples:
+
+```dart
+final interpreter = Interpreter();
+
+// Hyperbolic functions
+print(interpreter.eval('sinh(1)').value);     // 1.175...
+print(interpreter.eval('tanh(0.5)').value);   // 0.462...
+
+// Special functions
+print(interpreter.eval('gamma(5)').value);    // 24 (same as 4!)
+print(interpreter.eval('factorial2(6)').value); // 48 (6*4*2)
+
+// Statistics
+print(interpreter.eval('average(1, 2, 3, 4, 5)').value); // 3.0
+print(interpreter.eval('median(3, 7)').value);        // 5.0
+print(interpreter.eval('median(1, 2, 3, 4, 5)').value); // 3.0
+print(interpreter.eval('stdev(2, 8)').value);         // 4.24...
+print(interpreter.eval('stdev(1, 2, 3, 4, 5)').value); // 1.58...
+
+// Number theory
+print(interpreter.eval('gcd(48, 18)').value);    // 6
+```
 
 ## Getting Started
 
@@ -58,7 +128,7 @@ Add this package to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  fn_express: <latest_version>
+  fn_express: ^1.2.0
 ```
 
 Then import the package:
@@ -121,9 +191,16 @@ print(interpreter.eval('floor(3.7)'));       // 3
 print(interpreter.eval('ceil(3.2)'));        // 4
 print(interpreter.eval('round(3.7)'));       // 4
 
-// Factorial
+// Factorial and sign
 print(interpreter.eval('fact(5)'));          // 120
 print(interpreter.eval('fact(0)'));          // 1
+print(interpreter.eval('sign(-3.5)'));       // -1
+print(interpreter.eval('sign(0)'));          // 0
+
+// Constants
+print(interpreter.eval('phi'));              // 1.618... (golden ratio)
+print(interpreter.eval('tau'));              // 6.283... (2π)
+print(interpreter.eval('phi^2 - phi'));      // 1.0 (golden ratio property)
 ```
 
 ### Complex Numbers
@@ -151,9 +228,13 @@ print(interpreter.eval('ln(e)'));             // 1.0
 print(interpreter.eval('log(100, 10)'));      // 2.0
 print(interpreter.eval('log(8, 2)'));         // 3.0
 
-// Min/Max
-print(interpreter.eval('min(5, 3)'));         // 3
-print(interpreter.eval('max(2.5, 3.7)'));     // 3.7
+// Min/Max/Clamp with variable arguments
+print(interpreter.eval('min(5, 3)'));              // 3
+print(interpreter.eval('min(5, 2, 8, 1, 9)'));      // 1
+print(interpreter.eval('max(2.5, 3.7)'));          // 3.7
+print(interpreter.eval('max(5, 2, 8, 1, 9)'));      // 9
+print(interpreter.eval('clamp(15, 0, 10)'));       // 10
+print(interpreter.eval('clamp(-5, 0, 10)'));       // 0
 
 // Power functions
 print(interpreter.eval('pow(2, 8)'));         // 256.0
@@ -169,6 +250,26 @@ interpreter.eval('x = 5');
 print(interpreter.eval('2x'));               // 10 (2 * x)
 print(interpreter.eval('3(x + 1)'));         // 18 (3 * (x + 1))
 print(interpreter.eval('(x + 1)(x - 1)'));   // 24 ((x + 1) * (x - 1))
+```
+
+### Multi-Parameter Functions
+
+```dart
+final interpreter = Interpreter();
+
+// Statistical functions with multiple arguments
+print(interpreter.eval('average(1, 2, 3, 4, 5)'));    // 3.0
+print(interpreter.eval('median(1, 2, 3, 4, 5)'));     // 3.0
+print(interpreter.eval('median(10, 5, 15, 20)'));     // 12.5
+print(interpreter.eval('stdev(1, 2, 3, 4, 5)'));      // 1.58...
+print(interpreter.eval('variance(2, 4, 6, 8)'));      // 6.67...
+
+// Min/Max with multiple values
+print(interpreter.eval('min(5, 2, 8, 1, 9, 3)'));     // 1
+print(interpreter.eval('max(5, 2, 8, 1, 9, 3)'));     // 9
+
+// Mode with multiple occurrences
+print(interpreter.eval('mode(1, 2, 2, 3, 2, 4)'));    // 2
 ```
 
 ### Combined Examples

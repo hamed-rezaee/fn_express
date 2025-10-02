@@ -26,15 +26,23 @@ class Evaluator {
   ///
   /// The [rpnQueue] should contain tokens in postfix order, and the
   /// [interpreter] provides access to variables, constants, and functions.
-  Evaluator(Queue<Token> rpnQueue, Interpreter interpreter)
-      : _rpnQueue = rpnQueue,
-        _interpreter = interpreter;
+  /// The optional [functionArgCounts] map provides argument counts for functions.
+  Evaluator(
+    Queue<Token> rpnQueue,
+    Interpreter interpreter, [
+    Map<String, int>? functionArgCounts,
+  ])  : _rpnQueue = rpnQueue,
+        _interpreter = interpreter,
+        _functionArgCounts = functionArgCounts ?? {};
 
   /// The queue of tokens in Reverse Polish Notation to evaluate.
   final Queue<Token> _rpnQueue;
 
   /// The interpreter instance containing variables, constants, and functions.
   final Interpreter _interpreter;
+
+  /// Map of function names to their argument counts from the original expression.
+  final Map<String, int> _functionArgCounts;
 
   /// Evaluates the RPN expression and returns the final result.
   ///
@@ -52,7 +60,7 @@ class Evaluator {
   ///
   /// Example:
   /// ```dart
-  /// final result = evaluator.evaluate(); // Returns computed value
+  /// final result = evaluator.evaluate();
   /// ```
   NumberValue evaluate() {
     final stack = <NumberValue>[];
@@ -100,7 +108,12 @@ class Evaluator {
         final funcName = token.value;
 
         if (_interpreter.multiArgFunctions.containsKey(funcName)) {
-          final argCount = _interpreter.multiArgFunctions[funcName]!.item2;
+          final expectedArgCount =
+              _interpreter.multiArgFunctions[funcName]!.item2;
+          final actualArgCount =
+              _functionArgCounts[funcName] ?? expectedArgCount;
+          final argCount =
+              expectedArgCount == -1 ? actualArgCount : expectedArgCount;
 
           if (stack.length < argCount) {
             throw StateError('Not enough arguments for function $funcName');
@@ -124,6 +137,7 @@ class Evaluator {
         }
       }
     }
+
     if (stack.length != 1) {
       throw StateError('The expression is malformed.');
     }
