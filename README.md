@@ -1,6 +1,20 @@
 # Fn Express
 
-A powerful Dart package for parsing and evaluating mathematical expressions with support for variables, functions, constants, and complex numbers.
+A comprehensive Dart package for parsing and evaluating mathematical expressions with extensive support for variables, functions, constants, and complex numbers. Features a robust expression parser, rich mathematical function library, and interactive REPL environment.
+
+## Table of Contents
+
+- [Features](#features)
+- [Quick Start Example](#quick-start-example)
+- [Installation](#installation)
+- [Mathematical Functions](#mathematical-functions)
+- [Constants](#constants)
+- [Usage Examples](#usage-examples)
+- [Interactive REPL](#interactive-repl)
+- [Error Handling](#error-handling)
+- [Architecture](#architecture)
+- [Contributing](#contributing)
+- [License](#license)
 
 ## Features
 
@@ -85,50 +99,34 @@ A powerful Dart package for parsing and evaluating mathematical expressions with
 - `phi` - Golden ratio φ (1.61803...)
 - `tau` - Mathematical constant τ = 2π (6.28318...)
 
-## What's New in v1.2.0
-
-🎉 **Major Function Expansion!** We've added 15+ new mathematical functions:
-
-### New Functions Added:
-
-- **Hyperbolic Functions**: `sinh()`, `cosh()`, `tanh()`, `asinh()`, `acosh()`, `atanh()`
-- **Exponential**: `exp()` (e^x)
-- **Special Math**: `gamma()`, `factorial2()` (double factorial)
-- **Number Theory**: `gcd()`, `lcm()`
-- **Statistics**: `average()`, `median()`, `mode()`, `stdev()`, `variance()`
-- **Random**: `random()` for random number generation
-
-### Quick Examples:
+## Quick Start Example
 
 ```dart
+import 'package:fn_express/fn_express.dart';
+
 final interpreter = Interpreter();
 
-// Hyperbolic functions
-print(interpreter.eval('sinh(1)').value);     // 1.175...
-print(interpreter.eval('tanh(0.5)').value);   // 0.462...
+// Basic arithmetic and variables
+interpreter.eval('x = 10');
+print(interpreter.eval('2 * x + sqrt(16)'));  // 24.0
 
-// Special functions
-print(interpreter.eval('gamma(5)').value);    // 24 (same as 4!)
-print(interpreter.eval('factorial2(6)').value); // 48 (6*4*2)
+// Mathematical functions
+print(interpreter.eval('sin(pi/2) + cos(0)'));  // 2.0
 
-// Statistics
-print(interpreter.eval('average(1, 2, 3, 4, 5)').value); // 3.0
-print(interpreter.eval('median(3, 7)').value);        // 5.0
-print(interpreter.eval('median(1, 2, 3, 4, 5)').value); // 3.0
-print(interpreter.eval('stdev(2, 8)').value);         // 4.24...
-print(interpreter.eval('stdev(1, 2, 3, 4, 5)').value); // 1.58...
+// Complex numbers
+print(interpreter.eval('(3 + 4i) * (1 + i)'));  // -1.0 + 7.0i
 
-// Number theory
-print(interpreter.eval('gcd(48, 18)').value);    // 6
+// Statistical functions
+print(interpreter.eval('average(1, 2, 3, 4, 5)'));  // 3.0
 ```
 
-## Getting Started
+## Installation
 
 Add this package to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  fn_express: ^1.2.0
+  fn_express: <latest version>
 ```
 
 Then import the package:
@@ -137,7 +135,7 @@ Then import the package:
 import 'package:fn_express/fn_express.dart';
 ```
 
-## Usage
+## Usage Examples
 
 ### Basic Arithmetic
 
@@ -272,22 +270,59 @@ print(interpreter.eval('max(5, 2, 8, 1, 9, 3)'));     // 9
 print(interpreter.eval('mode(1, 2, 2, 3, 2, 4)'));    // 2
 ```
 
-### Combined Examples
+### Real-World Examples
 
 ```dart
 final interpreter = Interpreter();
 
-// Complex mathematical expressions
-interpreter.eval('a = 3');
-interpreter.eval('b = 4');
-print(interpreter.eval('sqrt(a^2 + b^2)'));  // 5.0 (Pythagorean theorem)
+// Physics: Kinetic energy calculation
+interpreter.eval('mass = 10');      // kg
+interpreter.eval('velocity = 25');  // m/s
+print(interpreter.eval('0.5 * mass * velocity^2'));  // 3125 Joules
 
-// Trigonometry with variables
-interpreter.eval('angle = pi/4');
-print(interpreter.eval('sin(angle)^2 + cos(angle)^2')); // 1.0
+// Geometry: Circle area and circumference
+interpreter.eval('radius = 5');
+print(interpreter.eval('pi * radius^2'));      // Area: 78.54
+print(interpreter.eval('2 * pi * radius'));    // Circumference: 31.42
 
-// Mixed operations with rounding
-print(interpreter.eval('floor(sqrt(50)) + ceil(pi)')); // 11 (7 + 4)
+// Statistics: Data analysis
+interpreter.eval('data = average(23, 45, 56, 78, 12, 67, 89, 34)');
+print(interpreter.eval('data'));                        // 50.5
+print(interpreter.eval('stdev(23, 45, 56, 78, 12, 67, 89, 34)'));  // Standard deviation
+
+// Finance: Compound interest
+interpreter.eval('principal = 1000');
+interpreter.eval('rate = 0.05');
+interpreter.eval('time = 10');
+print(interpreter.eval('principal * (1 + rate)^time'));  // 1628.89
+
+// Engineering: Pythagorean theorem in 3D
+interpreter.eval('x = 3; y = 4; z = 12');
+print(interpreter.eval('sqrt(x^2 + y^2 + z^2)'));      // 13.0
+```
+
+### Advanced Mathematical Operations
+
+```dart
+final interpreter = Interpreter();
+
+// Complex number calculations (electrical engineering)
+interpreter.eval('z1 = 3 + 4i');
+interpreter.eval('z2 = 1 - 2i');
+print(interpreter.eval('z1 * z2'));          // 11.0 - 2.0i
+print(interpreter.eval('abs(z1)'));          // 5.0 (magnitude)
+
+// Trigonometric identities verification
+print(interpreter.eval('sin(pi/3)^2 + cos(pi/3)^2'));   // 1.0
+print(interpreter.eval('tan(pi/4)'));                    // 1.0
+
+// Logarithmic and exponential relationships
+print(interpreter.eval('ln(exp(5))'));       // 5.0
+print(interpreter.eval('log(10^3, 10)'));    // 3.0
+
+// Statistical analysis
+final data = 'stdev(12, 15, 18, 22, 25, 28, 31, 34, 37, 40)';
+print(interpreter.eval(data));               // Sample standard deviation
 ```
 
 ### Interactive REPL
@@ -393,26 +428,79 @@ try {
 
 ## Architecture
 
-The package consists of several key components:
+The package consists of several key components working together:
 
-- **Lexer**: Tokenizes mathematical expressions
+- **Lexer**: Tokenizes mathematical expressions into meaningful symbols
 - **Parser**: Converts infix notation to postfix (RPN) using the Shunting Yard algorithm
-- **Evaluator**: Evaluates postfix expressions using a stack-based approach
-- **Interpreter**: Coordinates the process and manages variables/functions
-- **NumberValue**: Type system supporting integers, doubles, and complex numbers
+- **Evaluator**: Evaluates postfix expressions using an efficient stack-based approach
+- **Interpreter**: Coordinates the entire process and manages variables/functions
+- **NumberValue**: Flexible type system supporting integers, doubles, and complex numbers
+- **REPL**: Interactive environment with comprehensive help and command system
+
+### Type System
+
+The package uses automatic type promotion to handle different number types seamlessly:
+
+```
+Integer → Double  → Complex
+5       → 5.0     → 5.0 + 0.0i
+```
+
+This ensures that operations always produce mathematically correct results while maintaining performance.
+
+## Use Cases
+
+Fn Express is ideal for:
+
+- **Educational Software**: Teaching mathematical concepts with interactive calculations
+- **Scientific Applications**: Complex mathematical computations in research
+- **Engineering Tools**: Formula-based calculations and simulations
+- **Financial Software**: Interest calculations, statistical analysis
+- **Game Development**: Mathematical systems, physics calculations
+- **Data Analysis**: Statistical computations and data processing
+- **Calculator Applications**: Building advanced calculator functionality
+
+```dart
+final interpreter = Interpreter();
+
+for (final expression in expressions) {
+  try {
+    final result = interpreter.eval(expression);
+    print('$expression = $result');
+  } catch (e) {
+    print('Error evaluating $expression: $e');
+  }
+}
+```
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
+We welcome contributions! Here's how you can help:
+
+1. **Bug Reports**: Open an issue with detailed reproduction steps
+2. **Feature Requests**: Suggest new mathematical functions or features
+3. **Code Contributions**: Submit pull requests with tests and documentation
+4. **Documentation**: Improve examples, fix typos, or add use cases
+
+### Development Setup
+
+```bash
+git clone https://github.com/hamed-rezaee/fn_express.git
+cd fn_express
+dart pub get
+dart test
+```
+
+For major changes, please open an issue first to discuss the proposed changes.
 
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](/LICENSE) file for details.
 
-## Additional Information
+## Resources
 
-- **Package Homepage**: [GitHub Repository](https://github.com/hamed-rezaee/fn_express)
+- **Package Homepage**: [pub.dev](https://pub.dev/packages/fn_express)
+- **Source Code**: [GitHub Repository](https://github.com/hamed-rezaee/fn_express)
 - **Issue Tracker**: [GitHub Issues](https://github.com/hamed-rezaee/fn_express/issues)
-- **Documentation**: API documentation is available on [pub.dev](https://pub.dev/packages/fn_express)
-
-For questions or suggestions, please feel free to open an issue on GitHub.
+- **API Documentation**: [pub.dev documentation](https://pub.dev/documentation/fn_express)
+- **Changelog**: [CHANGELOG.md](CHANGELOG.md)

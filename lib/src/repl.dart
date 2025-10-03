@@ -91,7 +91,7 @@ class Repl {
 
       onOutput('${result.value}');
     } catch (e) {
-      onOutput('Error: $e');
+      onOutput('$e');
     }
   }
 
@@ -277,6 +277,7 @@ class Repl {
   /// Prints currently defined variables.
   void _printVariables() {
     onOutput('');
+
     if (_interpreter.variables.isEmpty) {
       onOutput('No variables defined.');
     } else {

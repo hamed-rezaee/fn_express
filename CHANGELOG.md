@@ -1,3 +1,7 @@
+## 1.1.2
+
+- Update `README.md`
+
 ## 1.1.1
 
 - Refined REPL support with removal of `dart:io` dependency
