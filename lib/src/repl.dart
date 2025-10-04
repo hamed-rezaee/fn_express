@@ -13,19 +13,30 @@ import 'package:fn_express/fn_express.dart';
 ///
 /// Example usage:
 /// ```dart
-/// final repl = Repl();
-/// repl.start();
+/// var isRunning = true;
+///
+/// final repl = Repl(
+///   (output, {newline = true}) =>
+///       newline ? stdout.writeln(output) : stdout.write(output),
+/// );
+///
+/// while (isRunning) {
+///   stdout.write('>> ');
+///   final input = stdin.readLineSync();
+///
+///   (input == null || input.toLowerCase() == 'exit')
+///       ? isRunning = false
+///       : repl(input);
+/// }
 /// ```
 class Repl {
   /// Creates a new REPL instance with a fresh interpreter.
-  Repl({required this.onInput, required this.onOutput})
-      : _interpreter = Interpreter();
+  Repl(this.onOutput) : _interpreter = Interpreter() {
+    _printWelcome();
+  }
 
   /// The interpreter instance used for expression evaluation.
   final Interpreter _interpreter;
-
-  /// Callback function to handle user input.
-  final String? Function() onInput;
 
   /// Callback function to handle output display.
   final void Function(String value, {bool newline}) onOutput;
@@ -35,21 +46,11 @@ class Repl {
   /// The session continues until the user enters 'exit' or presses Ctrl+C.
   /// Users can enter mathematical expressions, variable assignments, or
   /// special commands like 'help' for assistance.
-  void start() {
-    _printWelcome();
+  void call(String? input) {
+    if (input == null || input.toLowerCase() == 'exit') return;
+    if (input.trim().isEmpty) return;
 
-    while (true) {
-      onOutput('>> ', newline: false);
-
-      final input = onInput();
-
-      if (input == null || input.toLowerCase() == 'exit') break;
-      if (input.trim().isEmpty) continue;
-
-      _processInput(input.trim());
-    }
-
-    _printGoodbye();
+    _processInput(input.trim());
   }
 
   /// Processes user input and executes the appropriate action.
@@ -105,12 +106,6 @@ class Repl {
     onOutput('Enter mathematical expressions or type "help" for assistance.');
     onOutput('Type "exit" to quit.');
     onOutput('');
-  }
-
-  /// Prints the goodbye message.
-  void _printGoodbye() {
-    onOutput('');
-    onOutput('Thanks for using Fn Express REPL! Goodbye!');
   }
 
   /// Prints the main help information.
@@ -302,7 +297,7 @@ class Repl {
   /// Prints version information.
   void _printVersion() {
     onOutput('');
-    onOutput('Fn Express REPL v1.1.1');
+    onOutput('Fn Express REPL 1.1.3');
     onOutput('Mathematical Expression Parser for Dart');
     onOutput('');
   }

@@ -338,10 +338,24 @@ The package includes a powerful REPL (Read-Eval-Print Loop) for interactive math
 
 #### Usage
 
-To start the REPL:
+To use the REPL:
 
-```bash
-dart run example/fn_express_example.dart
+```dart
+var isRunning = true;
+
+final repl = Repl(
+  (output, {newline = true}) =>
+      newline ? stdout.writeln(output) : stdout.write(output),
+);
+
+while (isRunning) {
+  stdout.write('>> ');
+  final input = stdin.readLineSync();
+
+  (input == null || input.toLowerCase() == 'exit')
+      ? isRunning = false
+      : repl(input);
+}
 ```
 
 ```

@@ -1,3 +1,7 @@
+## 1.1.3
+
+- Minor `Repl` refactor
+
 ## 1.1.2
 
 - Update `README.md`
