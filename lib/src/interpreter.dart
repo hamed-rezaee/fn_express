@@ -327,6 +327,44 @@ class Interpreter {
         },
         -1,
       ),
+      'vector': Tuple2(
+        (args) {
+          if (args.isEmpty) {
+            throw ArgumentError('Vector requires at least one argument.');
+          }
+
+          return MatrixValue.rowVector(List<NumberValue>.from(args));
+        },
+        -1,
+      ),
+      'matrix': Tuple2(
+        (args) {
+          if (args.isEmpty) {
+            throw ArgumentError('Matrix requires at least one row.');
+          }
+
+          final rows = <List<NumberValue>>[];
+
+          for (final entry in args) {
+            if (entry is MatrixValue) {
+              if (entry.rowCount == 1) {
+                rows.add(List<NumberValue>.from(entry.value.first));
+              } else if (entry.columnCount == 1) {
+                rows.add(entry.value.map((row) => row.first).toList());
+              } else {
+                throw ArgumentError(
+                  'Matrix rows must be provided as vectors (single row or column).',
+                );
+              }
+            } else {
+              rows.add([entry]);
+            }
+          }
+
+          return MatrixValue.fromRows(rows);
+        },
+        -1,
+      ),
     };
   }
 
@@ -415,6 +453,10 @@ class Interpreter {
     },
     'atan': (x) => DoubleValue(math.atan(x.value as num)),
     'abs': (x) {
+      if (x is MatrixValue) {
+        throw ArgumentError('Absolute value not supported for matrices.');
+      }
+
       if (x is ComplexValue) {
         return DoubleValue(
           math.sqrt(
@@ -555,6 +597,87 @@ class Interpreter {
       return IntegerValue(_factorial2(numValue.toInt()));
     },
     'exp': (x) => DoubleValue(math.exp(x.value as num)),
+    'sec': (x) {
+      final numValue = x.value as num;
+      final cosValue = math.cos(numValue);
+
+      if (cosValue == 0) {
+        throw ArgumentError('Secant undefined (division by zero).');
+      }
+
+      return DoubleValue(1 / cosValue);
+    },
+    'csc': (x) {
+      final numValue = x.value as num;
+      final sinValue = math.sin(numValue);
+
+      if (sinValue == 0) {
+        throw ArgumentError('Cosecant undefined (division by zero).');
+      }
+
+      return DoubleValue(1 / sinValue);
+    },
+    'cot': (x) {
+      final numValue = x.value as num;
+      final tanValue = math.tan(numValue);
+
+      if (tanValue == 0) {
+        throw ArgumentError('Cotangent undefined (division by zero).');
+      }
+
+      return DoubleValue(1 / tanValue);
+    },
+    'sech': (x) => DoubleValue(1 / _cosh(x.value as num)),
+    'csch': (x) {
+      final sinhValue = _sinh(x.value as num);
+
+      if (sinhValue == 0) {
+        throw ArgumentError(
+          'Hyperbolic cosecant undefined (division by zero).',
+        );
+      }
+
+      return DoubleValue(1 / sinhValue);
+    },
+    'coth': (x) {
+      final tanhValue = _tanh(x.value as num);
+
+      if (tanhValue == 0) {
+        throw ArgumentError(
+          'Hyperbolic cotangent undefined (division by zero).',
+        );
+      }
+
+      return DoubleValue(1 / tanhValue);
+    },
+    'transpose': (x) {
+      if (x is! MatrixValue) {
+        throw ArgumentError('transpose requires a matrix argument.');
+      }
+
+      return x.transpose();
+    },
+    'det': (x) {
+      if (x is! MatrixValue) {
+        throw ArgumentError('det requires a matrix argument.');
+      }
+
+      return x.determinant();
+    },
+    'trace': (x) {
+      if (x is! MatrixValue) {
+        throw ArgumentError('trace requires a matrix argument.');
+      }
+
+      return x.trace();
+    },
+    'eigenvalues': (x) {
+      if (x is! MatrixValue) {
+        throw ArgumentError('eigenvalues requires a matrix argument.');
+      }
+
+      return x.eigenvalues();
+    },
   };
 
   /// Map of multi-argument functions with their implementations and argument counts.
