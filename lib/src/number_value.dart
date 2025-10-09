@@ -2,6 +2,33 @@ import 'dart:math' as math;
 
 import 'package:fn_express/src/complex.dart';
 
+const double _numberValueEpsilon = 1e-12;
+
+bool _isEffectivelyInteger(double value) =>
+    (value - value.round()).abs() <= _numberValueEpsilon;
+
+double _sanitizeComponent(double value) =>
+    value.abs() <= _numberValueEpsilon ? 0.0 : value;
+
+NumberValue _sanitizeComplexResult(NumberValue value) {
+  if (value is! ComplexValue) {
+    return value;
+  }
+
+  final real = _sanitizeComponent(value.value.real);
+  final imag = _sanitizeComponent(value.value.imaginary);
+
+  if (imag == 0.0) {
+    if (_isEffectivelyInteger(real)) {
+      return IntegerValue(real.round());
+    }
+
+    return DoubleValue(real);
+  }
+
+  return ComplexValue(Complex(real, imag));
+}
+
 /// Abstract base class for all numeric values in mathematical expressions.
 ///
 /// This class defines the interface for different types of numbers (integers,
@@ -131,11 +158,46 @@ class IntegerValue extends NumberValue {
 
   @override
   NumberValue power(NumberValue exponent) {
-    final result = math.pow(value, exponent.value as num);
+    if (exponent is ComplexValue) {
+      return _sanitizeComplexResult(
+        ComplexValue.from(this).power(exponent),
+      );
+    }
 
-    return result % 1 == 0
-        ? IntegerValue(result.toInt())
-        : DoubleValue(result.toDouble());
+    final exponentValue = (exponent.value as num).toDouble();
+    final result = math.pow(value, exponentValue);
+
+    if (result is int) {
+      return IntegerValue(result);
+    }
+
+    if (result is double) {
+      if (result.isNaN) {
+        return _sanitizeComplexResult(
+          ComplexValue.from(this).power(DoubleValue(exponentValue)),
+        );
+      }
+
+      if (_isEffectivelyInteger(result)) {
+        return IntegerValue(result.round());
+      }
+
+      return DoubleValue(result);
+    }
+
+    final doubleResult = result.toDouble();
+
+    if (doubleResult.isNaN) {
+      return _sanitizeComplexResult(
+        ComplexValue.from(this).power(DoubleValue(exponentValue)),
+      );
+    }
+
+    if (_isEffectivelyInteger(doubleResult)) {
+      return IntegerValue(doubleResult.round());
+    }
+
+    return DoubleValue(doubleResult);
   }
 
   @override
@@ -223,8 +285,40 @@ class DoubleValue extends NumberValue {
   }
 
   @override
-  NumberValue power(NumberValue exponent) =>
-      DoubleValue(math.pow(value, exponent.value as num).toDouble());
+  NumberValue power(NumberValue exponent) {
+    if (exponent is ComplexValue) {
+      return _sanitizeComplexResult(
+        ComplexValue.from(this).power(exponent),
+      );
+    }
+
+    final exponentValue = (exponent.value as num).toDouble();
+    final result = math.pow(value, exponentValue);
+
+    if (result is double) {
+      if (result.isNaN) {
+        return _sanitizeComplexResult(
+          ComplexValue.from(this).power(DoubleValue(exponentValue)),
+        );
+      }
+
+      return DoubleValue(result);
+    }
+
+    if (result is int) {
+      return DoubleValue(result.toDouble());
+    }
+
+    final doubleResult = result.toDouble();
+
+    if (doubleResult.isNaN) {
+      return _sanitizeComplexResult(
+        ComplexValue.from(this).power(DoubleValue(exponentValue)),
+      );
+    }
+
+    return DoubleValue(doubleResult);
+  }
 
   @override
   NumberValue negate() => DoubleValue(-value);

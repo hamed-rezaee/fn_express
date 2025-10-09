@@ -83,10 +83,14 @@ class Interpreter {
       ),
       'pow': Tuple2(
         (args) {
-          final base = args[0].value as num;
-          final exponent = args[1].value as num;
+          if (args.length != 2) {
+            throw ArgumentError('Pow function requires exactly two arguments.');
+          }
 
-          return DoubleValue(math.pow(base, exponent).toDouble());
+          final base = args[0];
+          final exponent = args[1];
+
+          return base.power(exponent);
         },
         2,
       ),

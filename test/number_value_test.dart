@@ -110,6 +110,17 @@ void main() {
       expect(result.value, closeTo(math.sqrt(2), 0.0001));
     });
 
+    test('power with fractional exponent on negative base returns complex', () {
+      final num1 = IntegerValue(-4);
+      final num2 = DoubleValue(0.5);
+      final result = num1.power(num2);
+
+      expect(result, isA<ComplexValue>());
+      final complex = result as ComplexValue;
+      expect(complex.value.real.abs(), lessThan(1e-10));
+      expect(complex.value.imaginary, closeTo(2, 1e-10));
+    });
+
     test('negation', () {
       final num = IntegerValue(5);
       final result = num.negate();
@@ -209,6 +220,17 @@ void main() {
       final result = num1.power(num2);
       expect(result, isA<DoubleValue>());
       expect(result.value, equals(8.0));
+    });
+
+    test('power with fractional exponent on negative base returns complex', () {
+      final num1 = DoubleValue(-9);
+      final num2 = DoubleValue(0.5);
+      final result = num1.power(num2);
+
+      expect(result, isA<ComplexValue>());
+      final complex = result as ComplexValue;
+      expect(complex.value.real.abs(), lessThan(1e-10));
+      expect(complex.value.imaginary, closeTo(3, 1e-10));
     });
 
     test('negation', () {

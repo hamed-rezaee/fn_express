@@ -60,6 +60,20 @@ void main() {
       expect(result.value, equals(8));
     });
 
+    test('returns complex value for fractional power of negative base', () {
+      final queue = Queue<Token>()
+        ..add(NumberToken(IntegerValue(-4), '-4'))
+        ..add(NumberToken(DoubleValue(0.5), '0.5'))
+        ..add(OperatorToken('^'));
+      final evaluator = Evaluator(queue, interpreter);
+      final result = evaluator.evaluate();
+
+      expect(result, isA<ComplexValue>());
+      final complex = result as ComplexValue;
+      expect(complex.value.real.abs(), lessThan(1e-10));
+      expect(complex.value.imaginary, closeTo(2, 1e-10));
+    });
+
     test('evaluates unary minus', () {
       final queue = Queue<Token>()
         ..add(NumberToken(IntegerValue(5), '5'))

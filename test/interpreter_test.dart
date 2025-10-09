@@ -85,7 +85,25 @@ void main() {
 
     test('evaluates pow function', () {
       final result = interpreter.eval('pow(2, 3)');
-      expect(result.value, equals(8.0));
+      expect((result.value as num).toDouble(), equals(8.0));
+    });
+
+    test('evaluates fractional power of negative number as complex', () {
+      final result = interpreter.eval('(-16) ^ 0.5');
+
+      expect(result, isA<ComplexValue>());
+      final complex = result as ComplexValue;
+      expect(complex.value.real.abs(), lessThan(1e-10));
+      expect(complex.value.imaginary, closeTo(4, 1e-10));
+    });
+
+    test('pow function supports complex results', () {
+      final result = interpreter.eval('pow(-16, 0.5)');
+
+      expect(result, isA<ComplexValue>());
+      final complex = result as ComplexValue;
+      expect(complex.value.real.abs(), lessThan(1e-10));
+      expect(complex.value.imaginary, closeTo(4, 1e-10));
     });
 
     test('evaluates floor', () {
