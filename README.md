@@ -42,6 +42,7 @@ A comprehensive Dart package for parsing and evaluating mathematical expressions
 - **Interpolation & Extrapolation**: Estimate intermediate or out-of-range values with piecewise-linear interpolation and extrapolation utilities
 - **Sequence Synthesis**: Derive closed-form polynomials that reproduce user-provided numeric series
 - **Interactive REPL**: Full-featured Read-Eval-Print Loop with symbolic computation, help system, variable management, and command history
+- **Topic-Based Help**: Navigate REPL docs with searchable topics and per-command detail pages
 
 ## Mathematical Functions
 
@@ -167,12 +168,12 @@ print(interpreter.derivative('x * sin(x)', 'x'));       // 1 * sin(x) + x * cos(
 // Quotient rule
 print(interpreter.derivative('x / (x + 1)', 'x'));      // (1 * (x + 1) - x * 1) / (x + 1) ^ 2
 
-// NEW: Derivatives of reciprocal trig functions
+// Derivatives of reciprocal trig functions
 print(interpreter.derivative('sec(x)', 'x'));           // sec(x) * tan(x)
 print(interpreter.derivative('csc(x)', 'x'));           // -csc(x) * cot(x)
 print(interpreter.derivative('cot(x)', 'x'));           // -csc(x) ^ 2
 
-// NEW: Derivatives of hyperbolic functions
+// Derivatives of hyperbolic functions
 print(interpreter.derivative('sinh(x)', 'x'));          // cosh(x)
 print(interpreter.derivative('cosh(x)', 'x'));          // sinh(x)
 print(interpreter.derivative('tanh(x)', 'x'));          // 1 - tanh(x) ^ 2
@@ -384,11 +385,11 @@ interpreter.eval('x = 10');
 print(interpreter.eval('2 * x + sqrt(16)'));  // 24.0
 print(interpreter.eval('sin(pi/2) + cos(0)'));  // 2.0
 
-// NEW: Advanced trig and hyperbolic functions
+// Advanced trig and hyperbolic functions
 print(interpreter.eval('sec(0) + csc(pi/2)'));  // 2.0
 print(interpreter.eval('sinh(0) + cosh(0)'));   // 1.0
 
-// NEW: Complex number exponentiation
+// Complex number exponentiation
 print(interpreter.eval('i^2'));                 // -1.0 + 0.0i
 print(interpreter.eval('complex(1,1)^2'));      // 0.0 + 2.0i
 
@@ -659,6 +660,7 @@ print(interpreter.eval(data));               // Sample standard deviation
 The package includes a powerful REPL (Read-Eval-Print Loop) for interactive mathematical expression evaluation with **symbolic computation support**. The REPL provides:
 
 - **Comprehensive Help System**: Built-in documentation for all operators, functions, constants, and symbolic commands
+- **Topic-Based Navigation**: Use `help topics`, `help <section>`, or `help <command>` to jump directly to what you need
 - **Symbolic Computation**: Interactive expression simplification, differentiation, integration, and analysis
 - **Mixed Operations**: Seamlessly combine numeric evaluation with symbolic manipulation
 - **Variable Management**: Persistent variables across expressions with viewing and clearing capabilities
@@ -732,6 +734,47 @@ BASIC USAGE:
   • Assign variables: x = 10
   • Use functions: sin(pi/2)
   • Implicit multiplication: 2x, 3(x+1)
+
+PRIMARY TOPICS
+  help topics          List every help topic
+  help commands        Command reference grouped by category
+  help numeric         Numeric solvers, interpolation, sequences
+  help symbolic        Simplification, derivatives, integrals, gradients
+  help basics          Input syntax, assignments, and tips
+  help operators       Operator list and precedence
+  help functions       Built-in math functions
+  help constants       Built-in constants such as pi and e
+  help examples        Sample REPL interactions
+
+COMMAND SNAPSHOT
+SESSION
+  help | ?            Show the overview or a specific topic
+  exit                Leave the REPL
+  version             Display version info
+
+STATE
+  variables | vars    List variables you have defined
+  clear               Remove all stored variables
+
+Tip: Try `help solve`, `help sequence`, or any other command name for detailed usage.
+
+>> help solve
+════════ COMMAND DETAIL ═══════════════════
+
+Command: solve <expression> <variable> [initial] | [lower upper]
+Aliases: (none)
+Category: Numeric
+
+Find numeric roots of an equation.
+
+Usage:
+  solve <expression> <variable> [initial guess]
+  solve <expression> <variable> [lower upper]
+
+Examples:
+  >> solve x^2 - 2 x 0 2
+  Solution: x = 1.4142135623730951
+  Method: Bisection
 
 >> exit
 

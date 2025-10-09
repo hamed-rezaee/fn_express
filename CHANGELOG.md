@@ -1,3 +1,9 @@
+## 2.1.0
+
+### Improved
+
+- **REPL Help System**: Redesigned `help` experience with a searchable topic index, command summaries, and detailed command pages (`help <command>`)
+
 ## 2.0.0
 
 ### Added - Major Symbolic Computation Features

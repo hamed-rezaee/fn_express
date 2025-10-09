@@ -3,6 +3,9 @@
 
 import 'package:fn_express/fn_express.dart';
 
+const String _replVersionLabel = 'Fn Express REPL v2.1.0';
+const String _replDescription = 'Interactive Symbolic Math Toolkit';
+
 /// A Read-Eval-Print Loop (REPL) interface for interactive mathematical expression evaluation.
 ///
 /// The REPL provides an interactive command-line interface where users can:
@@ -69,26 +72,27 @@ class Repl {
   /// mathematical expressions.
   void _processInput(String input) {
     try {
-      switch (input.toLowerCase()) {
-        case 'help':
-        case '?':
-          _printHelp();
+      final lowerInput = input.toLowerCase();
+
+      if (lowerInput == 'help' || lowerInput == '?') {
+        _printHelp();
+        return;
+      }
+
+      if (lowerInput.startsWith('help ')) {
+        final topic = input.substring(5).trim();
+        if (_printHelpTopic(topic)) {
           return;
-        case 'help operators':
-          _printOperatorHelp();
-          return;
-        case 'help functions':
-          _printFunctionHelp();
-          return;
-        case 'help constants':
-          _printConstantHelp();
-          return;
-        case 'help examples':
-          _printExamples();
-          return;
-        case 'help symbolic':
-          _printSymbolicHelp();
-          return;
+        }
+
+        onOutput(
+          'Unknown help topic "$topic". Type "help topics" to list available topics.',
+        );
+
+        return;
+      }
+
+      switch (lowerInput) {
         case 'variables':
         case 'vars':
           _printVariables();
@@ -115,9 +119,21 @@ class Repl {
 
   /// Prints the welcome message and basic usage instructions.
   void _printWelcome() {
+    const innerWidth = 37;
+
+    String spaces(int count) => ''.padRight(count);
+
+    void printBoxLine(String text) {
+      final trimmed = text.trim();
+      final available = innerWidth - trimmed.length;
+      final left = available ~/ 2;
+      final right = available - left;
+      onOutput('│${spaces(left)}$trimmed${spaces(right)}│');
+    }
+
     onOutput('╭─────────────────────────────────────╮');
-    onOutput('│          Fn Express REPL            │');
-    onOutput('│   Mathematical Expression Parser    │');
+    printBoxLine(_replVersionLabel);
+    printBoxLine(_replDescription);
     onOutput('╰─────────────────────────────────────╯');
     onOutput('');
     onOutput('Enter mathematical expressions or type "help" for assistance.');
@@ -130,27 +146,325 @@ class Repl {
     onOutput('');
     onOutput('═══════════════════ HELP ═══════════════════');
     onOutput('');
-    onOutput('COMMANDS:');
-    onOutput('  help              Show this help message');
-    onOutput('  help operators    Show available operators');
-    onOutput('  help functions    Show available functions');
-    onOutput('  help constants    Show available constants');
-    onOutput('  help symbolic     Show symbolic computation commands');
-    onOutput('  help examples     Show usage examples');
-    onOutput('  variables         Show defined variables');
-    onOutput('  clear             Clear all variables');
-    onOutput('  version           Show version info');
-    onOutput('  solve             Solve equations numerically');
-    onOutput('  interpolate       Interpolate or extrapolate data points');
-    onOutput('  sequence          Generate a polynomial for a numeric series');
-    onOutput('  exit              Exit the REPL');
+    onOutput(
+        'Evaluate expressions directly, or run commands for symbolic and numeric tools.');
+    onOutput(
+        'Use "help <topic>" for sections or "help <command>" for detailed usage.');
     onOutput('');
-    onOutput('BASIC USAGE:');
+    onOutput('PRIMARY TOPICS');
+    _printCommandTable(const [
+      _HelpEntry('help topics', 'List every help topic'),
+      _HelpEntry('help commands', 'Command reference grouped by category'),
+      _HelpEntry('help numeric', 'Numeric solvers, interpolation, sequences'),
+      _HelpEntry(
+          'help symbolic', 'Simplification, derivatives, integrals, gradients'),
+      _HelpEntry('help basics', 'Input syntax, assignments, and tips'),
+      _HelpEntry('help operators', 'Operator list and precedence'),
+      _HelpEntry('help functions', 'Built-in math functions'),
+      _HelpEntry('help constants', 'Built-in constants such as pi and e'),
+      _HelpEntry('help examples', 'Sample REPL interactions'),
+    ]);
+    onOutput('');
+    onOutput('COMMAND SNAPSHOT');
+    _printCommandSummary();
+    onOutput('Get more detail with "help <command>" (e.g., help solve).');
+    onOutput('');
+    onOutput('INPUT BASICS');
+    _printInputBasicsBody();
+    onOutput('');
+    onOutput('TIPS');
+    _printTipsBody();
+    onOutput('');
+  }
+
+  void _printCommandSummary() {
+    const summaryCategories = <String>[
+      'Session',
+      'State',
+      'Symbolic',
+      'Calculus',
+      'Numeric',
+      'Analysis',
+      'Sequences',
+    ];
+
+    var printedCategory = false;
+
+    for (final category in summaryCategories) {
+      final entries = _commandInfos
+          .where((info) => info.category == category)
+          .map((info) => _HelpEntry(_formatCommandName(info), info.summary))
+          .toList();
+
+      if (entries.isEmpty) {
+        continue;
+      }
+
+      if (printedCategory) {
+        onOutput('');
+      }
+
+      printedCategory = true;
+      onOutput(category.toUpperCase());
+      _printCommandTable(entries);
+    }
+
+    if (printedCategory) {
+      onOutput('');
+    }
+  }
+
+  void _printInputBasicsBody() {
     onOutput('  • Enter expressions: 2 + 3 * 4');
     onOutput('  • Assign variables: x = 10');
     onOutput('  • Use functions: sin(pi/2)');
     onOutput('  • Implicit multiplication: 2x, 3(x+1)');
+  }
+
+  void _printTipsBody() {
+    onOutput(
+        '  • Use "help <topic>" for operators, functions, constants, symbolic tools, and more.');
+    onOutput(
+        '  • Combine symbolic commands with variables (e.g., simplify 2x + x when x=3).');
+    onOutput('  • Use parentheses to control precedence when in doubt.');
+  }
+
+  bool _printHelpTopic(String topic) {
+    final normalized = topic.trim().toLowerCase();
+
+    if (normalized.isEmpty) {
+      _printHelp();
+      return true;
+    }
+
+    switch (normalized) {
+      case 'topics':
+      case 'topic':
+      case 'index':
+        _printHelpTopics();
+        return true;
+      case 'commands':
+      case 'command':
+      case 'reference':
+        _printCommandReference();
+        return true;
+      case 'numeric':
+      case 'numerical':
+        _printNumericHelp();
+        return true;
+      case 'symbolic':
+      case 'symbolics':
+      case 'calculus':
+        _printSymbolicHelp();
+        return true;
+      case 'sequence':
+      case 'sequences':
+        _printSequenceHelp();
+        return true;
+      case 'basics':
+      case 'basic':
+      case 'input':
+      case 'intro':
+        _printBasicsHelp();
+        return true;
+      case 'operators':
+      case 'operator':
+        _printOperatorHelp();
+        return true;
+      case 'functions':
+      case 'function':
+        _printFunctionHelp();
+        return true;
+      case 'constants':
+      case 'constant':
+        _printConstantHelp();
+        return true;
+      case 'examples':
+      case 'example':
+        _printExamples();
+        return true;
+    }
+
+    final info = _findCommandInfo(normalized);
+
+    if (info != null) {
+      _printCommandDetail(info);
+      return true;
+    }
+
+    return false;
+  }
+
+  void _printHelpTopics() {
     onOutput('');
+    onOutput('════════ HELP TOPICS ═════════════════════');
+    onOutput('');
+    _printCommandTable(const [
+      _HelpEntry('help commands', 'Command reference grouped by category'),
+      _HelpEntry('help numeric', 'Numeric solvers and interpolation tools'),
+      _HelpEntry('help symbolic', 'Symbolic algebra and calculus commands'),
+      _HelpEntry('help sequence', 'Options for sequence fitting'),
+      _HelpEntry('help basics', 'Input syntax, assignments, and tips'),
+      _HelpEntry('help operators', 'Operator catalog and precedence'),
+      _HelpEntry('help functions', 'Built-in function library'),
+      _HelpEntry('help constants', 'Named constants like pi, e, tau'),
+      _HelpEntry('help examples', 'Sample REPL interactions'),
+    ]);
+    onOutput('');
+    onOutput(
+        'Tip: you can run help for aliases too (e.g., help vars, help nthderiv).');
+    onOutput('');
+  }
+
+  void _printCommandReference() {
+    onOutput('');
+    onOutput('════════ COMMAND REFERENCE ═══════════════');
+    onOutput('');
+    _printCommandSummary();
+    onOutput(
+        'Tip: run "help <command>" (e.g., help integrate) for detailed usage.');
+    onOutput('');
+  }
+
+  _CommandInfo? _findCommandInfo(String query) {
+    final normalized = query.toLowerCase();
+
+    for (final info in _commandInfos) {
+      if (info.matches(normalized)) {
+        return info;
+      }
+    }
+
+    return null;
+  }
+
+  String _formatCommandName(_CommandInfo info) {
+    if (info.aliases.isEmpty) {
+      return info.display;
+    }
+
+    return '${info.display} | ${info.aliases.join(', ')}';
+  }
+
+  void _printCommandDetail(_CommandInfo info) {
+    onOutput('');
+    onOutput('════════ COMMAND DETAIL ═══════════════════');
+    onOutput('');
+    onOutput('Command: ${info.display}');
+
+    if (info.aliases.isNotEmpty) {
+      onOutput('Aliases: ${info.aliases.join(', ')}');
+    }
+
+    onOutput('Category: ${info.category}');
+    onOutput('');
+    onOutput(info.summary);
+
+    if (info.usage.isNotEmpty) {
+      onOutput('');
+      onOutput('Usage:');
+      for (final usage in info.usage) {
+        onOutput('  $usage');
+      }
+    }
+
+    if (info.examples.isNotEmpty) {
+      onOutput('');
+      onOutput('Examples:');
+      for (final example in info.examples) {
+        onOutput('  >> ${example.input}');
+        for (final line in example.outputLines) {
+          onOutput('  $line');
+        }
+      }
+    }
+
+    if (info.notes.isNotEmpty) {
+      onOutput('');
+      onOutput('Notes:');
+      for (final note in info.notes) {
+        onOutput('  • $note');
+      }
+    }
+
+    onOutput('');
+  }
+
+  void _printNumericHelp() {
+    onOutput('');
+    onOutput('════════ NUMERIC TOOLS ═══════════════════');
+    onOutput('');
+    onOutput('EQUATION SOLVING:');
+    onOutput('  solve <expression> <variable> [initial] | [lower upper]');
+    onOutput(
+        '    Finds roots with adaptive Newton, secant, or bisection methods.');
+    onOutput(
+        '    Provide an initial guess or a bracketing interval for best results.');
+    onOutput('');
+    onOutput('INTERPOLATION:');
+    onOutput('  interpolate x1:y1,x2:y2,... value [extrapolate]');
+    onOutput('    Performs piecewise-linear interpolation.');
+    onOutput(
+        '    Add the "extrapolate" flag to allow values outside the sample range.');
+    onOutput('');
+    onOutput('SEQUENCE FITTING:');
+    onOutput(
+        '  sequence value1,value2,... [var=<name>] [start=<index>] [simplify=true|false] [raw]');
+    onOutput('    Discovers a polynomial that reproduces the numeric series.');
+    onOutput('    See "help sequence" for detailed options and examples.');
+    onOutput('');
+  }
+
+  void _printSequenceHelp() {
+    final info = _findCommandInfo('sequence');
+
+    if (info != null) {
+      _printCommandDetail(info);
+      return;
+    }
+
+    onOutput(
+        'Usage: sequence value1,value2,... [var=<name>] [start=<index>] [simplify=true|false] [raw]');
+    onOutput('');
+  }
+
+  void _printBasicsHelp() {
+    onOutput('');
+    onOutput('════════ BASICS ══════════════════════════');
+    onOutput('');
+    onOutput('EXPRESSION ENTRY:');
+    _printInputBasicsBody();
+    onOutput('');
+    onOutput('VARIABLES:');
+    onOutput(
+        '  • Assign with = and reuse in later expressions (e.g., x = 3, 2*x).');
+    onOutput('  • List stored values with "variables" (alias: vars).');
+    onOutput('  • Reset the workspace with "clear".');
+    onOutput('');
+    onOutput('TIPS:');
+    _printTipsBody();
+    onOutput('');
+  }
+
+  void _printCommandTable(List<_HelpEntry> entries) {
+    if (entries.isEmpty) {
+      return;
+    }
+
+    var width = 0;
+
+    for (final entry in entries) {
+      if (entry.command.length > width) {
+        width = entry.command.length;
+      }
+    }
+
+    width += 2;
+
+    for (final entry in entries) {
+      final paddedCommand = entry.command.padRight(width);
+      onOutput('  $paddedCommand${entry.description}');
+    }
   }
 
   /// Prints information about available operators.
@@ -378,8 +692,8 @@ class Repl {
   /// Prints version information.
   void _printVersion() {
     onOutput('');
-    onOutput('Fn Express REPL v2.0.0');
-    onOutput('Mathematical Expression Parser for Dart');
+    onOutput(_replVersionLabel);
+    onOutput('$_replDescription for Dart');
     onOutput('');
   }
 
@@ -755,7 +1069,7 @@ class Repl {
 
   void _processSequenceCommand(String args) {
     if (args.isEmpty || args.toLowerCase() == 'help') {
-      _printSequenceUsage();
+      _printSequenceHelp();
       return;
     }
 
@@ -763,7 +1077,7 @@ class Repl {
         args.split(RegExp(r'\s+')).where((p) => p.isNotEmpty).toList();
 
     if (rawParts.isEmpty) {
-      _printSequenceUsage();
+      _printSequenceHelp();
       return;
     }
 
@@ -789,7 +1103,7 @@ class Repl {
 
     if (valueParts.isEmpty) {
       onOutput('No sequence values provided.');
-      _printSequenceUsage();
+      _printSequenceHelp();
       return;
     }
 
@@ -812,7 +1126,7 @@ class Repl {
 
     if (values.isEmpty) {
       onOutput('Please provide at least one numeric value.');
-      _printSequenceUsage();
+      _printSequenceHelp();
       return;
     }
 
@@ -831,7 +1145,7 @@ class Repl {
       final eqIndex = token.indexOf('=');
       if (eqIndex == -1) {
         onOutput('Unknown option: $token');
-        _printSequenceUsage();
+        _printSequenceHelp();
         return;
       }
 
@@ -861,7 +1175,7 @@ class Repl {
           }
         default:
           onOutput('Unknown option: $token');
-          _printSequenceUsage();
+          _printSequenceHelp();
           return;
       }
     }
@@ -954,23 +1268,6 @@ class Repl {
     onOutput('');
   }
 
-  void _printSequenceUsage() {
-    onOutput(
-        'Usage: sequence value1,value2,... [var=<name>] [start=<index>] [simplify=true|false] [raw]');
-    onOutput('Examples:');
-    onOutput('  sequence 2,5,8,11');
-    onOutput('  sequence 1,4,9,16 start=1');
-    onOutput('  sequence 3,6,9 var=k start=1');
-    onOutput('Options:');
-    onOutput('  var=<name>        Set the index variable (default: n)');
-    onOutput(
-        '  start=<index>     Set the starting index for the first term (default: 0)');
-    onOutput(
-        '  simplify=false    Skip algebraic simplification of the resulting expression');
-    onOutput('  raw               Alias for simplify=false');
-    onOutput('');
-  }
-
   bool _isNumericToken(String token) => double.tryParse(token) != null;
 
   void _printSolveUsage() {
@@ -1008,3 +1305,264 @@ class Repl {
     onOutput('  interpolate 0:0,10:20 25 extrapolate');
   }
 }
+
+class _HelpEntry {
+  const _HelpEntry(this.command, this.description);
+
+  final String command;
+  final String description;
+}
+
+class _CommandInfo {
+  const _CommandInfo({
+    required this.key,
+    required this.display,
+    required this.summary,
+    required this.category,
+    this.aliases = const [],
+    this.usage = const [],
+    this.examples = const [],
+    this.notes = const [],
+  });
+
+  final String key;
+  final String display;
+  final String summary;
+  final String category;
+  final List<String> aliases;
+  final List<String> usage;
+  final List<_CommandExample> examples;
+  final List<String> notes;
+
+  bool matches(String query) {
+    final lower = query.toLowerCase();
+
+    if (key == lower) {
+      return true;
+    }
+
+    for (final alias in aliases) {
+      if (alias.toLowerCase() == lower) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+}
+
+class _CommandExample {
+  const _CommandExample(this.input, [this.outputLines = const []]);
+
+  final String input;
+  final List<String> outputLines;
+}
+
+const List<_CommandInfo> _commandInfos = [
+  _CommandInfo(
+    key: 'help',
+    display: 'help',
+    summary: 'Show the help overview or a specific topic.',
+    category: 'Session',
+    aliases: ['?'],
+    usage: [
+      'help',
+      'help topics',
+      'help <topic>',
+      'help <command>',
+    ],
+    examples: [
+      _CommandExample('help numeric'),
+      _CommandExample('help solve'),
+    ],
+    notes: [
+      'Topics include: commands, numeric, symbolic, sequence, basics, operators, functions, constants, examples.',
+    ],
+  ),
+  _CommandInfo(
+    key: 'exit',
+    display: 'exit',
+    summary: 'Leave the REPL session.',
+    category: 'Session',
+    usage: ['exit'],
+  ),
+  _CommandInfo(
+    key: 'version',
+    display: 'version',
+    summary: 'Display Fn Express version information.',
+    category: 'Session',
+    usage: ['version'],
+  ),
+  _CommandInfo(
+    key: 'variables',
+    display: 'variables',
+    summary: 'List all variables you have defined.',
+    category: 'State',
+    aliases: ['vars'],
+    usage: ['variables', 'vars'],
+  ),
+  _CommandInfo(
+    key: 'clear',
+    display: 'clear',
+    summary: 'Remove all stored variables.',
+    category: 'State',
+    usage: ['clear'],
+  ),
+  _CommandInfo(
+    key: 'simplify',
+    display: 'simplify <expression>',
+    summary: 'Algebraically simplify an expression.',
+    category: 'Symbolic',
+    usage: ['simplify <expression>'],
+    examples: [
+      _CommandExample('simplify x + x + 2*x', ['4*x']),
+      _CommandExample('simplify (x+1)^2', ['x^2 + 2*x + 1']),
+    ],
+  ),
+  _CommandInfo(
+    key: 'derivative',
+    display: 'derivative <expression> <variable>',
+    summary: 'Differentiate an expression with respect to a variable.',
+    category: 'Calculus',
+    usage: ['derivative <expression> <variable>'],
+    examples: [
+      _CommandExample('derivative x^2+2*x+1 x', ['2*x + 2']),
+    ],
+    notes: [
+      'The variable argument must be a valid identifier.',
+    ],
+  ),
+  _CommandInfo(
+    key: 'nthderivative',
+    display: 'nthderivative <expression> <variable> <order>',
+    summary: 'Compute a higher-order derivative.',
+    category: 'Calculus',
+    aliases: ['nthderiv'],
+    usage: [
+      'nthderivative <expression> <variable> <order>',
+      'nthderiv <expression> <variable> <order>',
+    ],
+    examples: [
+      _CommandExample('nthderiv x^4 x 2', ['12*x^2']),
+    ],
+  ),
+  _CommandInfo(
+    key: 'integrate',
+    display: 'integrate <expression> <variable> [lower upper]',
+    summary: 'Compute indefinite or definite integrals.',
+    category: 'Calculus',
+    usage: [
+      'integrate <expression> <variable>',
+      'integrate <expression> <variable> <lower> <upper>',
+    ],
+    examples: [
+      _CommandExample('integrate sin(x) x', ['-cos(x) + C']),
+      _CommandExample('integrate sin(x) x 0 pi', [
+        'Antiderivative: -cos(x)',
+        'Definite value: 2',
+      ]),
+    ],
+    notes: [
+      'Bounds must evaluate to numeric values when provided.',
+    ],
+  ),
+  _CommandInfo(
+    key: 'gradient',
+    display: 'gradient <expression> <var1,var2,...>',
+    summary: 'Compute partial derivatives for each variable.',
+    category: 'Calculus',
+    usage: ['gradient <expression> <var1,var2,...>'],
+    examples: [
+      _CommandExample('gradient x^2+y^2 x,y', [
+        '∂/∂x: 2*x',
+        '∂/∂y: 2*y',
+      ]),
+    ],
+    notes: [
+      'Supply comma-separated variables (e.g., x,y,z).',
+    ],
+  ),
+  _CommandInfo(
+    key: 'analyze',
+    display: 'analyze <expression>',
+    summary: 'Inspect variables, functions, and structural complexity.',
+    category: 'Analysis',
+    usage: ['analyze <expression>'],
+    examples: [
+      _CommandExample('analyze sin(x) + cos(y)', [
+        'Expression Analysis:',
+        '  Variables: x, y',
+        '  Functions: sin, cos',
+      ]),
+    ],
+    notes: [
+      'Reports variables, function usage, node counts, and complexity estimates.',
+    ],
+  ),
+  _CommandInfo(
+    key: 'solve',
+    display: 'solve <expression> <variable> [initial] | [lower upper]',
+    summary: 'Find numeric roots of an equation.',
+    category: 'Numeric',
+    usage: [
+      'solve <expression> <variable> [initial guess]',
+      'solve <expression> <variable> [lower upper]',
+    ],
+    examples: [
+      _CommandExample('solve x^2 - 2 x 0 2', [
+        'Solution: x = 1.4142135623730951',
+        'Method: Bisection',
+      ]),
+      _CommandExample('solve sin(x) = 0 x 3.0', [
+        'Solution: x = 3.141592653589793',
+      ]),
+    ],
+    notes: [
+      'Provide either a single initial guess or a lower/upper bracketing interval.',
+      'Outputs include the residual and iteration count for transparency.',
+    ],
+  ),
+  _CommandInfo(
+    key: 'interpolate',
+    display: 'interpolate x1:y1,x2:y2,... value [extrapolate]',
+    summary:
+        'Perform piecewise-linear interpolation or optional extrapolation.',
+    category: 'Numeric',
+    usage: [
+      'interpolate x1:y1,x2:y2,... value',
+      'interpolate x1:y1,x2:y2,... value extrapolate',
+    ],
+    examples: [
+      _CommandExample(
+          'interpolate 0:0,10:20,20:40 15', ['Interpolated value: 30']),
+      _CommandExample(
+          'interpolate 0:0,10:20 25 extrapolate', ['Interpolated value: 50']),
+    ],
+    notes: [
+      'Provide at least two data points in x:y form separated by commas.',
+    ],
+  ),
+  _CommandInfo(
+    key: 'sequence',
+    display: 'sequence value1,value2,... [options]',
+    summary: 'Fit a polynomial expression to a numeric sequence.',
+    category: 'Sequences',
+    usage: [
+      'sequence value1,value2,...',
+      'sequence value1,value2,... var=<name>',
+      'sequence value1,value2,... start=<index>',
+      'sequence value1,value2,... simplify=false',
+      'sequence value1,value2,... raw',
+    ],
+    examples: [
+      _CommandExample('sequence 2,5,8,11', ['Sequence expression: 3 * n + 2']),
+      _CommandExample(
+          'sequence 1,4,9,16 start=1', ['Sequence expression: (n + 1)^2']),
+    ],
+    notes: [
+      'Use var=<name> to change the index variable (default: n).',
+      'Use start=<index> to set the index of the first term (default: 0).',
+      'simplify=false or the raw flag returns the unsimplified polynomial.',
+    ],
+  ),
+];
