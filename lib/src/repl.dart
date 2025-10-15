@@ -3,7 +3,7 @@
 
 import 'package:fn_express/fn_express.dart';
 
-const String _replVersionLabel = 'Fn Express REPL v2.1.0';
+const String _replVersionLabel = 'Fn Express REPL v2.1.1';
 const String _replDescription = 'Interactive Symbolic Math Toolkit';
 
 /// A Read-Eval-Print Loop (REPL) interface for interactive mathematical expression evaluation.
