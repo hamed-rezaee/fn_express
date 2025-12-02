@@ -4,7 +4,7 @@ description: A Dart package for parsing and evaluating mathematical expressions
   with support for variables, functions, constants, expression simplification,
   and symbolic differentiation.
 
-version: 2.1.2
+version: 2.1.3
 
 homepage: https://github.com/hamed-rezaee/fn_express
 

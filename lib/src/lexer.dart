@@ -1,3 +1,5 @@
+// ignore_for_file: lines_longer_than_80_chars
+
 import 'package:fn_express/fn_express.dart';
 
 /// A lexical analyzer that tokenizes mathematical expressions into individual tokens.

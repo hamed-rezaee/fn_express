@@ -1,4 +1,6 @@
-﻿import 'package:fn_express/fn_express.dart';
+﻿// ignore_for_file: lines_longer_than_80_chars
+
+import 'package:fn_express/fn_express.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -92,7 +94,8 @@ void main() {
         expect(value.value.imaginary, equals(0));
       } else {
         fail(
-            'Unexpected number type for zero simplification: ${value.runtimeType}');
+          'Unexpected number type for zero simplification: ${value.runtimeType}',
+        );
       }
     });
 

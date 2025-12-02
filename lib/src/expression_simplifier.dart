@@ -1,3 +1,5 @@
+// ignore_for_file: lines_longer_than_80_chars
+
 import 'package:fn_express/src/ast_node.dart';
 import 'package:fn_express/src/number_value.dart';
 
