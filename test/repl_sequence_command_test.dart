@@ -1,5 +1,3 @@
-// ignore_for_file: lines_longer_than_80_chars
-
 import 'package:fn_express/fn_express.dart';
 import 'package:test/test.dart';
 

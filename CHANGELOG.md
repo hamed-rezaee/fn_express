@@ -1,3 +1,7 @@
+## 2.1.5
+
+- remove lines_longer_than_80_chars ignores and update lints
+
 ## 2.1.4
 
 - enforce line length lint rule and add build assets

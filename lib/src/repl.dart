@@ -1,5 +1,5 @@
 // Need to ignore these lint rules for this file as it's an interactive REPL
-// ignore_for_file: avoid_catches_without_on_clauses, lines_longer_than_80_chars
+// ignore_for_file: avoid_catches_without_on_clauses
 
 import 'package:fn_express/fn_express.dart';
 

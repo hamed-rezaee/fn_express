@@ -3,8 +3,6 @@
 /// This class represents a complex number in the form `a + bi`, where `a` is the
 /// real part and `b` is the imaginary part. Complex numbers are useful for
 /// mathematical calculations that involve the square root of negative numbers.
-// ignore_for_file: lines_longer_than_80_chars
-
 class Complex {
   /// Creates a new complex number with the given [real] and [imaginary] parts.
   ///

@@ -1,5 +1,3 @@
-// ignore_for_file: lines_longer_than_80_chars
-
 import 'dart:math' as math;
 
 import 'package:fn_express/src/complex.dart';
