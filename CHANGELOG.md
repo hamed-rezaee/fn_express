@@ -1,3 +1,7 @@
+## 2.1.4
+
+- enforce line length lint rule and add build assets
+
 ## 2.1.3
 
 - add ignore_for_file: lines_longer_than_80_chars to sources
